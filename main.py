@@ -132,78 +132,82 @@ last_shot_time = 0
 
 
 Instruction = Instruction()
-Instruction.start_detection()
+# Instruction.start_detection()
+start = False
+preGesture = None
 while running:
-    # print( "無窮回眷10" )
+    # 檢測手勢
+    Instruction.detect_gesture()
+    gesture = Instruction.get_gesture()
+    print("偵測手勢")
     for event in pygame.event.get():
-        print( "無窮回眷" )
-        Instruction.detect_gesture()
-        event.key = Instruction.get_gesture()
         if event.type == pygame.QUIT:
             running = False
+            break
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            running =False
+            break
 
-        # if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_SPACE and not paused:
-            if bullet_counter > 0 and pygame.time.get_ticks() - last_shot_time > SHOOT_DELAY:
-                print( "無窮回眷100" )
-                last_shot_time = pygame.time.get_ticks()
-                bullet = Bullet(player.rect.centerx, player.rect.top)
-                bullets.add(bullet)
-                bullet_counter -= 1
-            is_shooting = True
+        if not paused:
+            if gesture is None:
+                # 手勢停止對應的動作
+                if preGesture == "gesture2":  # 停止向左
+                    player.stop_left()
+                elif preGesture == "gesture3":  # 停止向右
+                    player.stop_right()
+                elif preGesture == "gesture1":  # 停止向上
+                    player.stop_up()
+                elif preGesture == "gesture4":  # 停止向下
+                    player.stop_down()
+            elif gesture == "shoot":  # 對應原本的開始鍵盤事件
+                print("Start")
+                if bullet_counter > 0 and pygame.time.get_ticks() - last_shot_time > SHOOT_DELAY:
+                    last_shot_time = pygame.time.get_ticks()
+                    bullet = Bullet(player.rect.centerx, player.rect.top)
+                    bullets.add(bullet)
+                    bullet_counter -= 1
+                is_shooting = True
 
-        elif event.key == pygame.K_ESCAPE:
-            print( "無窮回眷199" )
-            Instruction.destory()
-            sys.exit(0)
-        elif event.key == pygame.K_p or event.key == pygame.K_PAUSE:
-            print( "無窮回眷19" )
-            paused = not paused
-        elif not paused:
+            elif gesture == "gesture_escape":  # 對應ESC退出的事件
+                print("無窮回眷199")
+                Instruction.destory()
+                sys.exit(0)
 
-            if event.key is None:
-                continue
-            elif event.key == "gesture2": # left
+            elif gesture == "gesture_pause":  # 對應P鍵或PAUSE鍵暫停的事件
+                print("無窮回眷19")
+                paused = not paused
+            # 玩家移動控制
+            elif gesture == "gesture2":  # left
                 print("left")
                 player.move_left()
-            elif event.key == "gesture3": # right
-                player.move_right()
+            elif gesture == "gesture3":  # right
                 print("right")
-            elif event.key == "gesture1": # up
-                player.move_up()
+                player.move_right()
+            elif gesture == "gesture1":  # up
                 print("up")
-            elif event.key == "gesture4": # down
-                player.move_down()
+                player.move_up()
+            elif gesture == "gesture4":  # down
                 print("down")
+                player.move_down()
 
-        # elif event.type == pygame.KEYUP:
-        print( "無窮回眷110" )
-        if event.key == pygame.K_SPACE and player.original_image is not None:
-            player.image = player.original_image.copy()
-            is_shooting = False
-        elif not paused:
-            if event.key == pygame.K_LEFT:
-                player.stop_left()
-            elif event.key == pygame.K_RIGHT:
-                player.stop_right()
-            elif event.key == pygame.K_UP:
-                player.stop_up()
-            elif event.key == pygame.K_DOWN:
-                player.stop_down()
+        elif event.type == pygame.JOYBUTTONDOWN:
+            print("無窮回眷11000")
+            if not paused and event.button == 0:
+                is_shooting = True
+                if bullet_counter > 0:
+                    bullet = Bullet(player.rect.centerx, player.rect.top)
+                    bullets.add(bullet)
+                    bullet_counter -= 1
+            elif event.button == 7:
+                paused = not paused
 
-        # elif event.type == pygame.JOYBUTTONDOWN:
-        print( "無窮回眷11000" )
-        if event.button == 0 and not paused:
-            is_shooting = True
-            if bullet_counter > 0:
-                bullet = Bullet(player.rect.centerx, player.rect.top)
-                bullets.add(bullet)
-                bullet_counter -= 1
-        elif event.button == 7:
-            paused = not paused
-        # elif event.type == pygame.JOYBUTTONUP:
-        if event.button == 0 and player.original_image is not None:
-            is_shooting = False
+        elif event.type == pygame.JOYBUTTONUP:
+            if event.button == 0 and player.original_image is not None:
+                is_shooting = False
+        preGesture = gesture
+        Instruction.detect_gesture()
+        gesture = Instruction.get_gesture()
+        print("偵測下一個手勢")
 
     if pygame.time.get_ticks() - last_shot_time > SHOOT_DELAY and is_shooting and not paused:
         if bullet_counter > 0:
@@ -227,7 +231,7 @@ while running:
     keys = pygame.key.get_pressed()
 
     if not paused:
-        print( "無窮回眷1000000000" )
+        print( "跑啊" )
         move_player(keys, player)
 
         screen.blit(current_image, (0, bg_y_shift))
