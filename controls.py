@@ -3,23 +3,23 @@ from classes.constants import WIDTH, HEIGHT
 
 
 def move_player(keys, player):
-    if keys[pygame.K_LEFT]:
-        if keys[pygame.K_UP]:
+    if keys == "gensture2":
+        if keys == "gensture1":
             player.move_up_left()
-        elif keys[pygame.K_DOWN]:
+        elif keys == "gensture4":
             player.move_down_left()
         else:
             player.move_left()
-    elif keys[pygame.K_RIGHT]:
-        if keys[pygame.K_UP]:
+    elif keys == "gensture3":
+        if keys == "gensture1":
             player.move_up_right()
-        elif keys[pygame.K_DOWN]:
+        elif keys == "gensture4":
             player.move_down_right()
         else:
             player.move_right()
-    elif keys[pygame.K_UP]:
+    elif keys== "gensture1":
         player.move_up()
-    elif keys[pygame.K_DOWN]:
+    elif keys == "gensture4":
         player.move_down()
     else:
         player.stop()

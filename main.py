@@ -135,11 +135,28 @@ Instruction = Instruction()
 # Instruction.start_detection()
 start = False
 preGesture = None
+time.sleep(3)
 while running:
     # 檢測手勢
     Instruction.detect_gesture()
     gesture = Instruction.get_gesture()
     print("偵測手勢")
+    keys = gesture
+
+    if not paused:
+        print( "跑啊" )
+        move_player(keys, player)
+
+        screen.blit(current_image, (0, bg_y_shift))
+        background_top_rect = background_top.get_rect(topleft=(0, bg_y_shift))
+        background_top_rect.top = bg_y_shift + HEIGHT
+        screen.blit(background_top, background_top_rect)
+
+    screen.blit(current_image, (0, bg_y_shift))
+    background_top_rect = background_top.get_rect(topleft=(0, bg_y_shift))
+    background_top_rect.top = bg_y_shift + HEIGHT
+    screen.blit(background_top, background_top_rect)
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -193,7 +210,7 @@ while running:
             elif gesture == "gensture4":  # down
                 print("down")
                 player.move_down()
-
+        
         elif event.type == pygame.JOYBUTTONDOWN:
             print("無窮回眷11000")
             if not paused and event.button == 0:
@@ -232,17 +249,6 @@ while running:
         pygame.display.flip()
         continue
 
-    keys = pygame.key.get_pressed()
-
-    if not paused:
-        print( "跑啊" )
-        move_player(keys, player)
-
-        screen.blit(current_image, (0, bg_y_shift))
-        background_top_rect = background_top.get_rect(topleft=(0, bg_y_shift))
-        background_top_rect.top = bg_y_shift + HEIGHT
-        screen.blit(background_top, background_top_rect)
-
     bg_y_shift += 1
     if bg_y_shift >= 0:
         bg_y_shift = -HEIGHT
@@ -268,10 +274,6 @@ while running:
         background_top = background_img.copy()
         new_background_activated = False
 
-    screen.blit(current_image, (0, bg_y_shift))
-    background_top_rect = background_top.get_rect(topleft=(0, bg_y_shift))
-    background_top_rect.top = bg_y_shift + HEIGHT
-    screen.blit(background_top, background_top_rect)
 
     if score > hi_score:
         hi_score = score
@@ -838,7 +840,7 @@ while running:
 
     pygame.display.flip()
 
-    clock.tick(10)
+    clock.tick(FPS)
     #time.sleep(1)
 
 pygame.mixer.music.stop()
