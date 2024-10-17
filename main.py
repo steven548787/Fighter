@@ -136,99 +136,146 @@ Instruction = Instruction()
 start = False
 preGesture = None
 time.sleep(3)
+keys = None
 while running:
-    # 檢測手勢
-    Instruction.detect_gesture()
-    gesture = Instruction.get_gesture()
-    print("偵測手勢")
-    keys = gesture
-
     if not paused:
         print( "跑啊" )
         move_player(keys, player)
 
+        screen.fill((0, 0, 0))
         screen.blit(current_image, (0, bg_y_shift))
         background_top_rect = background_top.get_rect(topleft=(0, bg_y_shift))
         background_top_rect.top = bg_y_shift + HEIGHT
         screen.blit(background_top, background_top_rect)
-
-    screen.blit(current_image, (0, bg_y_shift))
-    background_top_rect = background_top.get_rect(topleft=(0, bg_y_shift))
-    background_top_rect.top = bg_y_shift + HEIGHT
-    screen.blit(background_top, background_top_rect)
-    
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-            break
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            running =False
-            break
-
-        if not paused:
-            if gesture is None:
-                # 手勢停止對應的動作
-                if preGesture == "gensture2":  # 停止向左
-                    print("Stop Lefting")
-                    player.stop_left()
-                elif preGesture == "gensture3":  # 停止向右
-                    print("Stop Righting")
-                    player.stop_right()
-                elif preGesture == "gensture1":  # 停止向上
-                    print("Stop Upping")
-                    player.stop_up()
-                elif preGesture == "gensture4":  # 停止向下
-                    print("Stop Downing")
-                    player.stop_down()
-            elif gesture == "shoot":  # 對應原本的開始鍵盤事件
-                print("Start")
-                if bullet_counter > 0 and pygame.time.get_ticks() - last_shot_time > SHOOT_DELAY:
-                    last_shot_time = pygame.time.get_ticks()
-                    bullet = Bullet(player.rect.centerx, player.rect.top)
-                    bullets.add(bullet)
-                    bullet_counter -= 1
-                is_shooting = True
-
-            elif gesture == "gesture_escape":  # 對應ESC退出的事件
-                print("無窮回眷199")
-                Instruction.stop_detection()
-                sys.exit(0)
-
-            elif gesture == "gesture_pause":  # 對應P鍵或PAUSE鍵暫停的事件
-                print("無窮回眷19")
-                paused = not paused
-            # 玩家移動控制
-            elif gesture == "gensture2":  # left
-                print("left")
-                player.move_left()
-            elif gesture == "gensture3":  # right
-                print("right")
-                player.move_right()
-            elif gesture == "gensture1":  # up
-                print("up")
-                player.move_up()
-            elif gesture == "gensture4":  # down
-                print("down")
-                player.move_down()
-        
-        elif event.type == pygame.JOYBUTTONDOWN:
-            print("無窮回眷11000")
-            if not paused and event.button == 0:
-                is_shooting = True
-                if bullet_counter > 0:
-                    bullet = Bullet(player.rect.centerx, player.rect.top)
-                    bullets.add(bullet)
-                    bullet_counter -= 1
-            elif event.button == 7:
-                paused = not paused
-
-        elif event.type == pygame.JOYBUTTONUP:
-            if event.button == 0 and player.original_image is not None:
-                is_shooting = False
-        preGesture = gesture
+        # 檢測手勢
+        start_time = time.time()
         Instruction.detect_gesture()
         gesture = Instruction.get_gesture()
-        print("偵測下一個手勢")
+
+        print("偵測手勢")
+
+        keys = gesture
+        preGesture = gesture
+        elapsed_time = time.time() - start_time
+        print(f"Gesture detection took {elapsed_time:.2f} seconds")
+
+
+    # for event in pygame.event.get():
+    print("遊戲指令獲取")
+    # if event.type == pygame.QUIT:
+    #     running = False
+    #     break
+    # elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+    #     running =False
+    #     break
+
+    if random.randint(0, 120) == 0:
+        enemy_img = random.choice(enemy1_img)
+        enemy_object = Enemy1(
+            random.randint(100, WIDTH - 50),
+            random.randint(-HEIGHT, -50),
+            enemy_img,
+        )
+        enemy1_group.add(enemy_object)
+    for meteor_object in meteor_group:
+        meteor_object.update()
+        meteor_object.draw(screen)
+
+        if meteor_object.rect.colliderect(player.rect):
+            player_life -= 10
+            explosion = Explosion(meteor_object.rect.center, explosion_images)
+            explosions.add(explosion)
+            meteor_object.kill()
+            score += 50
+
+        bullet_collisions = pygame.sprite.spritecollide(meteor_object, bullets, True)
+        for bullet_collision in bullet_collisions:
+            explosion = Explosion(meteor_object.rect.center, explosion_images)
+            explosions.add(explosion)
+            meteor_object.kill()
+            score += 80
+
+            if random.randint(0, 10) == 0:
+                double_refill = DoubleRefill(
+                    meteor_object.rect.centerx,
+                    meteor_object.rect.centery,
+                    double_refill_img,
+                )
+                double_refill_group.add(double_refill)
+
+        if score >= 3000:
+            meteor_object.speed = 4
+        if score >= 10000:
+            meteor_object.speed = 6
+        if score >= 15000:
+            meteor_object.speed = 8
+        if score >= 20000:
+            meteor_object.speed = 10
+    if not paused:
+        if gesture is None:
+            # 手勢停止對應的動作
+            if preGesture == "gensture2":  # 停止向左
+                print("Stop Lefting")
+                player.stop_left()
+            elif preGesture == "gensture3":  # 停止向右
+                print("Stop Righting")
+                player.stop_right()
+            elif preGesture == "gensture1":  # 停止向上
+                print("Stop Upping")
+                player.stop_up()
+            elif preGesture == "gensture4":  # 停止向下
+                print("Stop Downing")
+                player.stop_down()
+        elif gesture == "shoot":  # 對應原本的開始鍵盤事件
+            print("Start")
+            if bullet_counter > 0 and pygame.time.get_ticks() - last_shot_time > SHOOT_DELAY:
+                last_shot_time = pygame.time.get_ticks()
+                bullet = Bullet(player.rect.centerx, player.rect.top)
+                bullets.add(bullet)
+                bullet_counter -= 1
+            is_shooting = True
+
+        elif gesture == "gesture_escape":  # 對應ESC退出的事件
+            print("無窮回眷199")
+            Instruction.stop_detection()
+            sys.exit(0)
+
+        elif gesture == "gesture_pause":  # 對應P鍵或PAUSE鍵暫停的事件
+            print("無窮回眷19")
+            paused = not paused
+        # 玩家移動控制
+        elif gesture == "gensture2":  # left
+            print("left")
+            player.move_left()
+        elif gesture == "gensture3":  # right
+            print("right")
+            player.move_right()
+        elif gesture == "gensture1":  # up
+            print("up")
+            player.move_up()
+        elif gesture == "gensture4":  # down
+
+            player.move_down()
+            print("down")
+    
+        # elif event.type == pygame.JOYBUTTONDOWN:
+        #     print("無窮回眷11000")
+        #     if not paused and event.button == 0:
+        #         is_shooting = True
+        #         if bullet_counter > 0:
+        #             bullet = Bullet(player.rect.centerx, player.rect.top)
+        #             bullets.add(bullet)
+        #             bullet_counter -= 1
+        #     elif event.button == 7:
+        #         paused = not paused
+
+        # elif event.type == pygame.JOYBUTTONUP:
+        #     if event.button == 0 and player.original_image is not None:
+        #         is_shooting = False
+            
+        # Instruction.detect_gesture()
+        # gesture = Instruction.get_gesture()
+        # print("偵測下一個手勢")
 
     if pygame.time.get_ticks() - last_shot_time > SHOOT_DELAY and is_shooting and not paused:
         if bullet_counter > 0:
@@ -249,6 +296,10 @@ while running:
         pygame.display.flip()
         continue
 
+    screen.blit(current_image, (0, bg_y_shift))
+    background_top_rect = background_top.get_rect(topleft=(0, bg_y_shift))
+    background_top_rect.top = bg_y_shift + HEIGHT
+    screen.blit(background_top, background_top_rect)
     bg_y_shift += 1
     if bg_y_shift >= 0:
         bg_y_shift = -HEIGHT
@@ -278,14 +329,6 @@ while running:
     if score > hi_score:
         hi_score = score
 
-    if random.randint(0, 120) == 0:
-        enemy_img = random.choice(enemy1_img)
-        enemy_object = Enemy1(
-            random.randint(100, WIDTH - 50),
-            random.randint(-HEIGHT, -50),
-            enemy_img,
-        )
-        enemy1_group.add(enemy_object)
 
     if score >= 3000 and random.randint(0, 40) == 0 and len(enemy2_group) < 2:
         enemy_img = random.choice(enemy2_img)
@@ -478,40 +521,6 @@ while running:
                 double_refill.kill()
                 double_refill.sound_effect.play()
 
-    for meteor_object in meteor_group:
-        meteor_object.update()
-        meteor_object.draw(screen)
-
-        if meteor_object.rect.colliderect(player.rect):
-            player_life -= 10
-            explosion = Explosion(meteor_object.rect.center, explosion_images)
-            explosions.add(explosion)
-            meteor_object.kill()
-            score += 50
-
-        bullet_collisions = pygame.sprite.spritecollide(meteor_object, bullets, True)
-        for bullet_collision in bullet_collisions:
-            explosion = Explosion(meteor_object.rect.center, explosion_images)
-            explosions.add(explosion)
-            meteor_object.kill()
-            score += 80
-
-            if random.randint(0, 10) == 0:
-                double_refill = DoubleRefill(
-                    meteor_object.rect.centerx,
-                    meteor_object.rect.centery,
-                    double_refill_img,
-                )
-                double_refill_group.add(double_refill)
-
-        if score >= 3000:
-            meteor_object.speed = 4
-        if score >= 10000:
-            meteor_object.speed = 6
-        if score >= 15000:
-            meteor_object.speed = 8
-        if score >= 20000:
-            meteor_object.speed = 10
 
     for meteor2_object in meteor2_group:
         meteor2_object.update()
@@ -549,6 +558,7 @@ while running:
             meteor2_object.speed = 10
 
     for enemy_object in enemy1_group:
+        print("敵人出現")
         enemy_object.update(enemy1_group)
         enemy1_group.draw(screen)
 
@@ -840,7 +850,7 @@ while running:
 
     pygame.display.flip()
 
-    clock.tick(FPS)
+    clock.tick(0.15)
     #time.sleep(1)
 
 pygame.mixer.music.stop()
