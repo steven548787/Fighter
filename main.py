@@ -151,13 +151,17 @@ while running:
         if not paused:
             if gesture is None:
                 # 手勢停止對應的動作
-                if preGesture == "gesture2":  # 停止向左
+                if preGesture == "gensture2":  # 停止向左
+                    print("Stop Lefting")
                     player.stop_left()
-                elif preGesture == "gesture3":  # 停止向右
+                elif preGesture == "gensture3":  # 停止向右
+                    print("Stop Righting")
                     player.stop_right()
-                elif preGesture == "gesture1":  # 停止向上
+                elif preGesture == "gensture1":  # 停止向上
+                    print("Stop Upping")
                     player.stop_up()
-                elif preGesture == "gesture4":  # 停止向下
+                elif preGesture == "gensture4":  # 停止向下
+                    print("Stop Downing")
                     player.stop_down()
             elif gesture == "shoot":  # 對應原本的開始鍵盤事件
                 print("Start")
@@ -170,23 +174,23 @@ while running:
 
             elif gesture == "gesture_escape":  # 對應ESC退出的事件
                 print("無窮回眷199")
-                Instruction.destory()
+                Instruction.stop_detection()
                 sys.exit(0)
 
             elif gesture == "gesture_pause":  # 對應P鍵或PAUSE鍵暫停的事件
                 print("無窮回眷19")
                 paused = not paused
             # 玩家移動控制
-            elif gesture == "gesture2":  # left
+            elif gesture == "gensture2":  # left
                 print("left")
                 player.move_left()
-            elif gesture == "gesture3":  # right
+            elif gesture == "gensture3":  # right
                 print("right")
                 player.move_right()
-            elif gesture == "gesture1":  # up
+            elif gesture == "gensture1":  # up
                 print("up")
                 player.move_up()
-            elif gesture == "gesture4":  # down
+            elif gesture == "gensture4":  # down
                 print("down")
                 player.move_down()
 
@@ -834,7 +838,7 @@ while running:
 
     pygame.display.flip()
 
-    clock.tick(FPS)
+    clock.tick(10)
     #time.sleep(1)
 
 pygame.mixer.music.stop()
